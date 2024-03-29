@@ -1,0 +1,18 @@
+<!-- view_appointments.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Appointments</title>
+</head>
+<body>
+    <h1>Your Appointments</h1>
+    <ul>
+        {% for appointment in appointments %}
+            <li>{{ appointment.doctor }} - {{ appointment.date }} - {{ appointment.time }}</li>
+        {% empty %}
+            <li>No appointments found</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

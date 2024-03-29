@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Services</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            line-height: 1.6;
+        }
+        footer {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        a{
+            background-color: #ffc720;
+            color: #63ea15;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Our Services</h1>
+        <a href="{% url 'about' %}"></a>
+        <a href="{% url 'login interface' %}"></a>
+    </header>
+    <main>
+        <p>At Virtual Healthcare, we offer a wide range of services to meet the needs of our patients. Here are some of the key services we provide:</p>
+        <ul>
+            <li>Telemedicine Consultations</li>
+            <li>Online Appointment Scheduling</li>
+            <li>Video Consultations</li>
+            <li>Medical Record Management</li>
+            <li>Prescription Management</li>
+            <li>Health Monitoring</li>
+        </ul>
+        <p>Our team of experienced healthcare professionals is dedicated to providing high-quality care and support to our patients. We strive to make healthcare more accessible and convenient through our innovative services.</p>
+    </main>
+    <footer>
+        <p>&copy; 2024 Virtual Healthcare</p>
+    </footer>
+</body>
+</html>

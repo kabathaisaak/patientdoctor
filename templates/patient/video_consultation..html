@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Patient Video Consultation</title>
+    <style>
+        #video-container {
+            width: 640px;
+            height: 480px;
+            margin: 0 auto;
+        }
+        #local-video, #remote-video {
+            width: 50%;
+            float: left;
+        }
+        #chat-box {
+            width: 300px;
+            height: 200px;
+            overflow-y: scroll;
+        }
+    </style>
+</head>
+<body>
+    <h1>Patient Video Consultation</h1>
+
+    <!-- Local Video Stream -->
+    <div id="video-container">
+        <video id="local-video" autoplay muted></video>
+        <video id="remote-video" autoplay></video>
+    </div>
+
+    <!-- Chat Box -->
+    <div id="chat-box">
+        <!-- Chat messages will appear here -->
+    </div>
+
+    <!-- Chat Input -->
+    <input type="text" id="chat-input">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        // WebRTC for video streaming
+        const localVideo = document.getElementById('local-video');
+        const remoteVideo = document.getElementById('remote-video');
+        let localStream, remoteStream;
+
+        // Get user media (camera and microphone)
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(stream => {
+                localStream = stream;
+                localVideo.srcObject = stream;
+            })
+            .catch(error => {
+                console.error('Error accessing media devices:', error);
+            });
+
+        // Peer connection setup
+        const configuration = { iceServers: [{ urls: 'stun:stun.example.org' }] };
+        let peerConnection = new RTCPeerConnection(configuration);
+
+        // Add local stream to peer connection
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+        // Set up event handlers for peer connection
+        peerConnection.ontrack = event => {
+            remoteStream = event.streams[0];
+            remoteVideo.srcObject = remoteStream;
+        };
+
+        peerConnection.onicecandidate = event => {
+            if (event.candidate) {
+                // Send ICE candidate to remote peer via WebSocket
+                sendIceCandidate(event.candidate);
+            }
+        };
+
+        // WebSocket for chat functionality
+        const websocket = new WebSocket('wss://example.com/chat');
+
+        websocket.onopen = () => {
+            console.log('WebSocket connection established.');
+        };
+
+        websocket.onmessage = event => {
+            // Handle incoming chat messages
+            const message = JSON.parse(event.data);
+            displayMessage(message);
+        };
+
+        // Function to send chat message
+        function sendMessage() {
+            const message = document.getElementById('chat-input').value;
+            const data = { type: 'message', content: message };
+            websocket.send(JSON.stringify(data));
+            displayMessage(data);
+            document.getElementById('chat-input').value = '';
+        }
+
+        // Function to display chat message
+        function displayMessage(message) {
+            const chatBox = document.getElementById('chat-box');
+            const messageElement = document.createElement('div');
+            messageElement.textContent = message.content;
+            chatBox.appendChild(messageElement);
+        }
+
+        // Function to send ICE candidate to remote peer
+        function sendIceCandidate(candidate) {
+            const data = { type: 'ice', candidate: candidate };
+            websocket.send(JSON.stringify(data));
+        }
+
+        // Function to handle incoming ICE candidate from remote peer
+        function handleIceCandidate(candidate) {
+            peerConnection.addIceCandidate(candidate)
+                .then(() => console.log('ICE candidate added successfully.'))
+                .catch(error => console.error('Error adding ICE candidate:', error));
+        }
+
+        // Function to handle incoming chat message from remote peer
+        function handleChatMessage(message) {
+            displayMessage(message);
+        }
+
+        // Function to handle incoming WebSocket message
+        function handleWebSocketMessage(event) {
+            const message = JSON.parse(event.data);
+            switch (message.type) {
+                case 'message':
+                    handleChatMessage(message);
+                    break;
+                case 'ice':
+                    handleIceCandidate(message.candidate);
+                    break;
+                default:
+                    console.warn('Unknown message type:', message.type);
+            }
+        }
+
+        websocket.onmessage = handleWebSocketMessage;
+
+        websocket.onclose = () => {
+            console.log('WebSocket connection closed.');
+        };
+
+        websocket.onerror = error => {
+            console.error('WebSocket error:', error);
+        };
+    </script>
+</body>
+</html>
